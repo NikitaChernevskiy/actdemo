@@ -1,158 +1,157 @@
 <style>
 	/* Floating chat button */
 	#chat-button {
-		position: fixed;
-		bottom: 120px;
-		right: 20px;
-		width: 60px;
-		height: 60px;
-		background: #002856;
-		border: none;
-		border-radius: 50%;
-		cursor: pointer;
-		z-index: 1000;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-		transition: transform 0.2s;
+	  position: fixed;
+	  bottom: 120px;
+	  right: 20px;
+	  width: 60px;
+	  height: 60px;
+	  background: #002856;
+	  border: none;
+	  border-radius: 50%;
+	  cursor: pointer;
+	  z-index: 1000;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	  transition: transform 0.2s;
 	}
-
+  
 	/* Make the icon’s square canvas fill the circle entirely */
 	#chat-button img {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-		/* preserve aspect ratio */
-		border-radius: 100%;
-		/* clip any corners to a circle */
+	  width: 100%;
+	  height: 100%;
+	  object-fit: contain;
+	  border-radius: 100%;
+	  transform: scale(1.3);
+	  transform-origin: center center;
 	}
-
+  
 	/* remove that ugly white focus ring */
 	#chat-button,
 	#chat-button:focus,
 	#chat-button:active {
-		outline: none;
-		box-shadow: none;
+	  outline: none;
+	  box-shadow: none;
 	}
-
-	/* bump the icon up by 10% */
-	#chat-button img {
-		transform: scale(1.3);
-		transform-origin: center center;
-	}
-
-
-	/* Pop‑up container */
+  
+	/* Pop-up container (desktop) */
 	#chat-popup-container {
-		position: fixed;
-		bottom: 190px;
-		right: 20px;
-		width: 360px;
-		height: 500px;
-		background: #fff;
-		border-radius: 8px;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-		overflow: hidden;
-		display: flex;
-		flex-direction: column;
-		opacity: 0;
-		transform: translateY(20px);
-		transition: opacity 0.3s ease, transform 0.3s ease;
-		z-index: 1001;
+	  position: fixed;
+	  bottom: 60px;
+	  right: 100px;      /* sits to the left of the 20px+60px button */
+	  left: auto;
+	  width: 360px;
+	  height: 500px;
+	  background: #fff;
+	  border-radius: 8px;
+	  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+	  overflow: hidden;
+	  display: flex;
+	  flex-direction: column;
+	  opacity: 0;
+	  transform: translateY(20px);
+	  transition: opacity 0.3s ease, transform 0.3s ease;
+	  z-index: 1001;
 	}
-
 	#chat-popup-container.visible {
-		opacity: 1;
-		transform: translateY(0);
+	  opacity: 1;
+	  transform: translateY(0);
 	}
-
+  
 	/* Close button */
 	#chat-popup-close {
-		position: absolute;
-		top: 8px;
-		right: 8px;
-		width: 28px;
-		height: 28px;
-		background: rgba(0, 0, 0, 0.5);
-		border: none;
-		border-radius: 50%;
-		color: #fff;
-		font-size: 18px;
-		line-height: 1;
-		cursor: pointer;
-		z-index: 1002;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+	  position: absolute;
+	  top: 8px;
+	  right: 8px;
+	  width: 28px;
+	  height: 28px;
+	  background: rgba(0, 0, 0, 0.5);
+	  border: none;
+	  border-radius: 50%;
+	  color: #fff;
+	  font-size: 18px;
+	  line-height: 1;
+	  cursor: pointer;
+	  z-index: 1002;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
 	}
-
+  
 	/* Iframe */
 	#chat-popup-container iframe {
-		flex: 1;
-		border: none;
+	  flex: 1;
+	  border: none;
 	}
-
-	/* Responsive tweak */
-	@media (max-width: 400px) {
-		#chat-popup-container {
-			width: 90%;
-			height: 70%;
-			bottom: 80px;
-		}
-
-		#chat-button {
-			width: 50px;
-			height: 50px;
-		}
+  
+	/* Responsive: center on phones */
+	@media (max-width: 450px) {
+	  #chat-popup-container {
+		width: 90%;
+		height: 70%;
+		bottom: 80px;              /* leave room for smaller button */
+		right: auto;
+		left: 50%;
+		transform: translate(-50%, 20px);
+	  }
+	  #chat-popup-container.visible {
+		transform: translate(-50%, 0);
+	  }
+  
+	  /* smaller button */
+	  #chat-button {
+		width: 50px;
+		height: 50px;
+	  }
 	}
-</style>
-<div>
+  </style>
+  
+  <div>
 	<!-- Chat activation button -->
 	<button id="chat-button" aria-label="Open Chat">
-		<img src="https://agent-dev-hosti.azurewebsites.net/static/website_icon.png" alt="Chat">
+	  <img src="https://agent-dev-hosti.azurewebsites.net/static/website_icon.png" alt="Chat">
 	</button>
-
+  
 	<!-- Popup toggle script -->
 	<script>
-		(function () {
-		  const BOT_URL = 'https://agent-dev-hosti.azurewebsites.net/';
-		  const btn = document.getElementById('chat-button');
-		
-		  btn.addEventListener('click', () => {
-			let popup = document.getElementById('chat-popup-container');
-			if (popup) {
-			  // just toggle visibility, don’t remove from DOM
-			  popup.classList.toggle('visible');
-			  return;
-			}
-		
-			// first time: create popup
-			popup = document.createElement('div');
-			popup.id = 'chat-popup-container';
-		
-			const closeBtn = document.createElement('button');
-			closeBtn.id = 'chat-popup-close';
-			closeBtn.innerHTML = '&times;';
-			closeBtn.addEventListener('click', () => {
-			  // hide but keep iframe alive in DOM
-			  popup.classList.remove('visible');
-			});
-		
-			const iframe = document.createElement('iframe');
-			iframe.src = BOT_URL;
-			iframe.allow = 'clipboard-read; clipboard-write;';
-		
-			popup.appendChild(closeBtn);
-			popup.appendChild(iframe);
-			document.body.appendChild(popup);
-		
-			// trigger CSS animation
-			requestAnimationFrame(() => popup.classList.add('visible'));
+	  (function () {
+		const BOT_URL = 'https://agent-dev-hosti.azurewebsites.net/';
+		const btn = document.getElementById('chat-button');
+  
+		btn.addEventListener('click', () => {
+		  let popup = document.getElementById('chat-popup-container');
+		  if (popup) {
+			popup.classList.toggle('visible');
+			return;
+		  }
+  
+		  // first time: create popup
+		  popup = document.createElement('div');
+		  popup.id = 'chat-popup-container';
+  
+		  const closeBtn = document.createElement('button');
+		  closeBtn.id = 'chat-popup-close';
+		  closeBtn.innerHTML = '&times;';
+		  closeBtn.addEventListener('click', () => {
+			popup.classList.remove('visible');
 		  });
-		})();
-		</script>		
-</div>
+  
+		  const iframe = document.createElement('iframe');
+		  iframe.src = BOT_URL;
+		  iframe.allow = 'clipboard-read; clipboard-write;';
+  
+		  popup.appendChild(closeBtn);
+		  popup.appendChild(iframe);
+		  document.body.appendChild(popup);
+  
+		  // trigger CSS animation
+		  requestAnimationFrame(() => popup.classList.add('visible'));
+		});
+	  })();
+	</script>
+  </div>  
 
 <html lang="en-US" class="">
 
