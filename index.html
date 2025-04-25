@@ -99,12 +99,13 @@
 	  #chat-popup-container.visible {
 		transform: translate(-50%, 0);
 	  }
-  
-	  /* smaller button */
+	}
+	@media (max-width: 570px) {
 	  #chat-button {
-		width: 50px;
-		height: 50px;
-	  }
+	  position: fixed;
+	  right: 10px;
+	  bottom: 100px;
+	}
 	}
   </style>
   
